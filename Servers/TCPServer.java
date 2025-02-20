@@ -1,32 +1,28 @@
-
+package Servers;
 import java.io.*;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
-import java.net.UnknownHostException;
 /**
  * 
  * @author cjaiswal
  *
+ *  
  * 
  */
-public class TCPClient 
+public class TCPServer 
 {
+    private ServerSocket serverSocket = null;
     private Socket socket = null;
     private InputStream inStream = null;
     private OutputStream outStream = null;
 
-    public TCPClient() 
+    public TCPServer() 
     {
-    	//create a socket to connect to localHost's (127.0.0.1) port 3339
+    	//create a server listen socket at port 3339
         try 
         {
-			socket = new Socket("localHost", 3339);
-			System.out.println("Connected!");
-		} 
-        catch (UnknownHostException e) 
-        {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			serverSocket = new ServerSocket(3339);
 		} 
         catch (IOException e) 
         {
@@ -35,52 +31,57 @@ public class TCPClient
 		}
     }
 
-    public void createSocket()
+    public void createSocket() 
     {
         try 
         {
-        	//fetch the streams
-            inStream = socket.getInputStream();
-            outStream = socket.getOutputStream();
-            createReadThread();
-            createWriteThread();
-        } 
-        catch (UnknownHostException u) 
-        {
-            u.printStackTrace();
-        } 
+            while (true) 
+            {
+            	//wait for a client to request to connect
+            	socket = serverSocket.accept();
+                
+            	//fetch the streams for the connected client	
+                inStream = socket.getInputStream();
+                outStream = socket.getOutputStream();
+                System.out.println("Connected");
+                createReadThread();
+                createWriteThread();
+            }
+        }
         catch (IOException io) 
         {
             io.printStackTrace();
         }
     }
-
+    
+    //Reading thread using anonymous class
     public void createReadThread() 
     {
         Thread readThread = new Thread() 
         {
             public void run() 
             {
+            	//check socket connectivity
                 while (socket.isConnected()) 
                 {
                     try 
                     {
                         byte[] readBuffer = new byte[200];
+                        //read the data from client
                         int num = inStream.read(readBuffer);
-
                         if (num > 0) 
                         {
                             byte[] arrayBytes = new byte[num];
                             System.arraycopy(readBuffer, 0, arrayBytes, 0, num);
                             String recvedMessage = new String(arrayBytes, "UTF-8");
                             System.out.println("Received message :" + recvedMessage);
-                        }
-                        else 
+                        } 
+                        else
                         {
-                        	notifyAll();
+                            notifyAll();
                         }
-                    }
-                    catch (SocketException se)
+                    } 
+                    catch (SocketException se) 
                     {
                         System.exit(0);
                     }
@@ -95,16 +96,19 @@ public class TCPClient
         readThread.start();
     }
 
+    //write thread using anonymous class
     public void createWriteThread() 
     {
         Thread writeThread = new Thread() 
         {
             public void run() 
             {
+            	//check socket connectivity
                 while (socket.isConnected()) 
                 {
-                	try 
-                	{
+                    try 
+                    {
+                    	//Use BufferedReader or Scanner to read from console
                         BufferedReader inputReader = new BufferedReader(new InputStreamReader(System.in));
                         sleep(100);
                         String typedMessage = inputReader.readLine();
@@ -115,32 +119,30 @@ public class TCPClient
                                 outStream.write(typedMessage.getBytes("UTF-8"));
                             }
                             sleep(100);
-                        }
-                        else
+                        } 
+                        else 
                         {
                         	notifyAll();
                         }
-                    } 
-                	catch (IOException i) 
-                	{
+                    }
+                    catch (IOException i) 
+                    {
                         i.printStackTrace();
                     } 
-                	catch (InterruptedException ie) 
-                	{
+                    catch (InterruptedException ie) 
+                    {
                         ie.printStackTrace();
                     }
-                }
+               }
             }
         };
         writeThread.setPriority(Thread.MAX_PRIORITY);
         writeThread.start();
     }
 
-    public static void main(String[] args) throws Exception 
+    public static void main(String[] args)
     {
-        TCPClient myChatClient = new TCPClient();
-        myChatClient.createSocket();
-        /*myChatClient.createReadThread();
-�       myChatClient.createWriteThread();*/
+        TCPServer chatServer = new TCPServer();
+        chatServer.createSocket();
     }
 }

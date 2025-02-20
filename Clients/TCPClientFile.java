@@ -1,6 +1,4 @@
-package networking;
-
-
+package Clients;
 import java.io.*;
 import java.net.Socket;
 import java.net.SocketException;
