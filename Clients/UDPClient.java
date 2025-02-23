@@ -22,7 +22,7 @@ public class UDPClient
         try 
         {
             Socket = new DatagramSocket();
-            InetAddress IPAddress = InetAddress.getByName("localhost");
+            InetAddress IPAddress = InetAddress.getByName("10.111.155.164");
             byte[] incomingData = new byte[1024];
             String sentence = "Viehmann";
             byte[] data = sentence.getBytes();

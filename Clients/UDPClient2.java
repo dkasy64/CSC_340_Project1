@@ -27,14 +27,14 @@ public class UDPClient2
 		}
     }
 
-    public void createAndListenSocket() 
+    public void createAndListenSocket()
     {
         try 
         {
             char ch='y';
             
             //create socket for the destination/server
-            InetAddress IPAddress = InetAddress.getByName("localhost");
+            InetAddress IPAddress = InetAddress.getByName("10.111.155.164");
             int serverPort = 9876;
             byte[] incomingData = new byte[1024];
             String sentence = "";
