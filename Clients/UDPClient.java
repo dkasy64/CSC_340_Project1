@@ -1,4 +1,5 @@
-package Clients;
+//package Networking;
+
 import java.io.IOException;
 import java.net.*;
 /**
@@ -22,7 +23,7 @@ public class UDPClient
         try 
         {
             Socket = new DatagramSocket();
-            InetAddress IPAddress = InetAddress.getByName("10.111.155.164");
+            InetAddress IPAddress = InetAddress.getByName("localhost");// gets ip address
             byte[] incomingData = new byte[1024];
             String sentence = "Viehmann";
             byte[] data = sentence.getBytes();
