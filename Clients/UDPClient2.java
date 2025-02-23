@@ -15,6 +15,7 @@ public class UDPClient2
     private Scanner in = new Scanner(System.in);
     public UDPClient2() 
     {
+        //testing
     	//create a client socket with random port number chose by DatagramSocket
     	try 
     	{
