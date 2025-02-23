@@ -7,7 +7,7 @@ import java.util.Scanner;
  * @author cjaiswal
  *
  *  
- * 
+ * gdkg
  */
 public class UDPClient2 
 {
