@@ -1,4 +1,4 @@
-package Networking;
+//package Networking;
 
 import java.io.IOException;
 import java.net.*;
@@ -23,13 +23,14 @@ public class UDPClient
         try 
         {
             Socket = new DatagramSocket();
-            InetAddress IPAddress = InetAddress.getByName("localhost");
+            InetAddress IPAddress = InetAddress.getByName("localhost"); //gets ip address
             byte[] incomingData = new byte[1024];
             String sentence = "Viehmann";
-            byte[] data = sentence.getBytes();
+            byte[] data = sentence.getBytes(); 
             DatagramPacket sendPacket = new DatagramPacket(data, data.length, IPAddress, 9876);
             Socket.send(sendPacket);
             System.out.println("Message sent from client");
+            
             DatagramPacket incomingPacket = new DatagramPacket(incomingData, incomingData.length);
             Socket.receive(incomingPacket);
             String response = new String(incomingPacket.getData());

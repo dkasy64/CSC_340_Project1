@@ -1,4 +1,4 @@
-package networking;
+//package networking;
 
 
 import java.io.*;
@@ -24,7 +24,7 @@ public class TCPClientFile
     {
 
     }
-
+	
     public void createSocket()
     {
         try 
