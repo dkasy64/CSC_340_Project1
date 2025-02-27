@@ -1,4 +1,4 @@
-//package networking;
+package Clients;
 
 import java.io.IOException;
 import java.net.*;
@@ -8,7 +8,7 @@ import java.util.Scanner;
  * @author cjaiswal
  *
  *  
- * 
+ *
  */
 public class UDPClient2 
 {
@@ -16,6 +16,7 @@ public class UDPClient2
     private Scanner in = new Scanner(System.in);
     public UDPClient2() 
     {
+        //testing
     	//create a client socket with random port number chose by DatagramSocket
     	try 
     	{
@@ -28,7 +29,7 @@ public class UDPClient2
 		}
     }
 
-    public void createAndListenSocket() 
+    public void createAndListenSocket()
     {
         try 
         {
@@ -89,3 +90,4 @@ public class UDPClient2
         client.createAndListenSocket();
     }
 }
+
