@@ -25,10 +25,11 @@ public class UDPClient
             InetAddress IPAddress = InetAddress.getByName("localhost");
             byte[] incomingData = new byte[1024];
             String sentence = "Viehmann";
-            byte[] data = sentence.getBytes();
+            byte[] data = sentence.getBytes(); 
             DatagramPacket sendPacket = new DatagramPacket(data, data.length, IPAddress, 9876);
             Socket.send(sendPacket);
             System.out.println("Message sent from client");
+            
             DatagramPacket incomingPacket = new DatagramPacket(incomingData, incomingData.length);
             Socket.receive(incomingPacket);
             String response = new String(incomingPacket.getData());

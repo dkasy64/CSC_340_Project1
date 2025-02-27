@@ -1,5 +1,8 @@
 package Clients;
+<<<<<<< HEAD
 
+=======
+>>>>>>> e7d73d48706fe890430571227f3518242adfab06
 import java.io.*;
 import java.net.Socket;
 import java.net.SocketException;
@@ -23,7 +26,7 @@ public class TCPClientFile
     {
 
     }
-
+	
     public void createSocket()
     {
         try 

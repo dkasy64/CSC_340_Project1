@@ -1,5 +1,8 @@
 package Clients;
+<<<<<<< HEAD
 //package networking;
+=======
+>>>>>>> e7d73d48706fe890430571227f3518242adfab06
 
 import java.io.IOException;
 import java.net.*;
@@ -37,7 +40,7 @@ public class UDPClient2
             char ch='y';
             
             //create socket for the destination/server
-            InetAddress IPAddress = InetAddress.getByName("10.111.155.164");
+            InetAddress IPAddress = InetAddress.getByName("127.0.0.1");
             int serverPort = 9876;
             byte[] incomingData = new byte[1024];
             String sentence = "";

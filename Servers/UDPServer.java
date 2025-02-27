@@ -48,7 +48,7 @@ public class UDPServer
                 
                 socket.send(replyPacket);
                 Thread.sleep(2000);
-                socket.close();
+               // socket.close();
             }
         } 
         catch (SocketException e) 
