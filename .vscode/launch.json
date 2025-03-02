@@ -1,0 +1,91 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Current File",
+            "request": "launch",
+            "mainClass": "${file}"
+        },
+        {
+            "type": "java",
+            "name": "Server",
+            "request": "launch",
+            "mainClass": "ClientServer.Server",
+            "projectName": "CSC_340_Project1_9d69e514"
+        },
+        {
+            "type": "java",
+            "name": "Test",
+            "request": "launch",
+            "mainClass": "ClientServer.Test",
+            "projectName": "CSC_340_Project1_9d69e514"
+        },
+        {
+            "type": "java",
+            "name": "TCPClient",
+            "request": "launch",
+            "mainClass": "Clients.TCPClient",
+            "projectName": "CSC_340_Project1_9d69e514"
+        },
+        {
+            "type": "java",
+            "name": "TCPClientFile",
+            "request": "launch",
+            "mainClass": "Clients.TCPClientFile",
+            "projectName": "CSC_340_Project1_9d69e514"
+        },
+        {
+            "type": "java",
+            "name": "UDPClient",
+            "request": "launch",
+            "mainClass": "Clients.UDPClient",
+            "projectName": "CSC_340_Project1_9d69e514"
+        },
+        {
+            "type": "java",
+            "name": "UDPClient2",
+            "request": "launch",
+            "mainClass": "Clients.UDPClient2",
+            "projectName": "CSC_340_Project1_9d69e514"
+        },
+        {
+            "type": "java",
+            "name": "P2PNode",
+            "request": "launch",
+            "mainClass": "P2P.P2PNode",
+            "projectName": "CSC_340_Project1_9d69e514"
+        },
+        {
+            "type": "java",
+            "name": "TCPServer",
+            "request": "launch",
+            "mainClass": "TCPServer",
+            "projectName": "CSC_340_Project1_9d69e514"
+        },
+        {
+            "type": "java",
+            "name": "TCPServerFile",
+            "request": "launch",
+            "mainClass": "TCPServerFile",
+            "projectName": "CSC_340_Project1_9d69e514"
+        },
+        {
+            "type": "java",
+            "name": "UDPServer",
+            "request": "launch",
+            "mainClass": "UDPServer",
+            "projectName": "CSC_340_Project1_9d69e514"
+        },
+        {
+            "type": "java",
+            "name": "UDPServer2",
+            "request": "launch",
+            "mainClass": "UDPServer2",
+            "projectName": "CSC_340_Project1_9d69e514"
+        }
+    ]
+}
