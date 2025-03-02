@@ -1,9 +1,9 @@
 # Client-Server Mode Configuration
 # Format: NodeID, IP Address, Port, Home Directory Path, Role
 
-1, 192.168.1.101, 5001, /home/node1, server
-2, 192.168.1.102, 5002, /home/node2, client
-3, 192.168.1.103, 5003, /home/node3, client
-4, 192.168.1.104, 5004, /home/node4, client
-5, 192.168.1.105, 5005, /home/node5, client
-6, 192.168.1.106, 5006, /home/node6, client
+1, 127.0.0.1, 5002, /home/node1, client
+2, 127.0.0.1, 5003, /home/node2, client
+3, 127.0.0.1, 5004, /home/node3, client
+4, 127.0.0.1, 5005, /home/node4, client
+5, 127.0.0.1, 5006, /home/node5, client
+6, 127.0.0.1, 5007, /home/node6, client
