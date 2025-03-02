@@ -10,11 +10,14 @@ public class P2PNode {
     private final List<InetSocketAddress> peerAddresses; // List of peer addresses
     private DatagramSocket socket; // UDP socket for communication
     private SecureRandom random; // SecureRandom for generating random intervals
+    private final Map<InetSocketAddress, Long> lastHeartbeatTimes; // Map to store last heartbeat times
+    private static final long HEARTBEAT_TIMEOUT = 60000; // Timeout in milliseconds (e.g., 60 seconds)
 
     public P2PNode(int port, List<InetSocketAddress> peerAddresses) {
         this.port = port;
         this.peerAddresses = peerAddresses;
         this.random = new SecureRandom(); // Initialize SecureRandom
+        this.lastHeartbeatTimes = new HashMap<>(); // Initialize the heartbeat tracker
         try {
             this.socket = new DatagramSocket(port); // Bind socket to the specified port
         } catch (SocketException e) {
@@ -29,6 +32,9 @@ public class P2PNode {
 
         // Start receiving heartbeats in a separate thread
         new Thread(this::receiveHeartbeats).start();
+
+        // Start monitoring node availability in a separate thread
+        new Thread(this::monitorAvailability).start();
     }
 
     private void sendHeartbeats() {
@@ -63,10 +69,40 @@ public class P2PNode {
                 // Wait to receive a heartbeat
                 socket.receive(packet);
                 String message = new String(packet.getData(), 0, packet.getLength());
-                System.out.println("Received: " + message + " from " + packet.getPort());
+                InetSocketAddress senderAddress = new InetSocketAddress(packet.getAddress(), packet.getPort());
+
+                // Update the last heartbeat time for the sender
+                lastHeartbeatTimes.put(senderAddress, System.currentTimeMillis()); // update the hashmap with latest avalability
+                System.out.println("Received: " + message + " from " + senderAddress.getPort());
             }
         } catch (IOException e) {
             System.err.println("Error in receiveHeartbeats: " + e.getMessage());
+        }
+    }
+
+    private void monitorAvailability() {
+        while (true) {
+            // Check the availability of each peer
+            List<String> availabilityList = new ArrayList<>();
+            for (InetSocketAddress peer : peerAddresses) {
+                long lastHeartbeatTime = lastHeartbeatTimes.getOrDefault(peer, 0L);
+                long currentTime = System.currentTimeMillis();
+                boolean isAvailable = (currentTime - lastHeartbeatTime) < HEARTBEAT_TIMEOUT;
+                availabilityList.add("Node " + peer.getPort() + ": " + (isAvailable ? "Available" : "Unavailable"));
+            }
+
+            // Display the availability list
+            System.out.println("Node Availability:");
+            for (String status : availabilityList) {
+                System.out.println(status);
+            }
+
+            // Sleep for a while before checking again
+            try {
+                Thread.sleep(30000); // Check every 30 seconds
+            } catch (InterruptedException e) {
+                System.err.println("Error in monitorAvailability: " + e.getMessage());
+            }
         }
     }
 
