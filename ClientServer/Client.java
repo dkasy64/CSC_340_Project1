@@ -1,9 +1,5 @@
 package ClientServer;
 
-//I LITERALLY DONT UNDERSTAND WHY THIS FILE DOESN'T
-//IMPORT ITS LITERALLY FINE JHGJASHGUIHRWJGNSFKJGHJSR
-//import ClientServer.Node;
-import P2P.Node;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;

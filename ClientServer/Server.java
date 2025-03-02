@@ -1,8 +1,5 @@
 package ClientServer;
 
-import P2P.ConfigReader;
-import P2P.Node;
-
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -16,7 +13,7 @@ public class Server {
     private Map<Integer, Node> clientNodes;
     private Map<Integer, String> clientStatus;
     private Map<Integer, Long> clientLastHeartbeat;
-    private static final long TIMEOUT = 30000;
+    private static final long TIMEOUT = 30000; //30 seconds
     private int counter;
 
     //making all the maps and setting the port
@@ -47,29 +44,6 @@ public class Server {
         socket.close();
     }
 
-    //creates datagram socket to server's port, and listens for UDP packets
-    //and when the packet is recieved, it extracts the message from the packet and then
-    //calls handleUpdate so that the server can keep track of the status of all of the clients
-    public void recieveUpdates() throws Exception {
-        DatagramSocket socket = new DatagramSocket(port);
-        byte[] buffer = new byte[1024];
-        DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-        while (true) {
-            socket.receive(packet);
-            String message = new String(packet.getData(), 0, packet.getLength());
-            handleUpdate(message);
-        }
-    }
-
-    //this basically puts the updates of the clients into the clientStatus map so that
-    //the server can keep track of the status of all of the clients :)
-    private void handleUpdate(String message) {
-        String[] parts = message.split(",");
-        int clientID = Integer.parseInt(parts[0]);
-        String availability = parts[1];
-        clientStatus.put(clientID, availability);
-        clientLastHeartbeat.put(clientID, System.currentTimeMillis());
-    }
 
     //this method broadcasts the status of all of the clients to all of the clients, so
     //they all know what's what, and also prints out the status of each node to da console
@@ -82,6 +56,7 @@ public class Server {
                 for (Map.Entry<Integer, String> entry : clientStatus.entrySet()) {
                     int clientID = entry.getKey();
                     long lastHeartBeat = clientLastHeartbeat.get(clientID);
+                    clientLastHeartbeat.put(clientID, currentTime);
                     if (currentTime - lastHeartBeat <= TIMEOUT) {
                         statusMessage.append("\n").append("Node").append(clientID).append(" : Avaliable");
                     } else {
@@ -102,41 +77,35 @@ public class Server {
         }
     }
 
-    //starts two threads, one for recieving updates from clients, and one for broadcasting status
-    //to the clients so they know who's alive and who's not
     public void start() {
-        new Thread(() -> {
-            try {
-                recieveUpdates();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }).start();
-
         new Thread(this::broadcastStatus).start();
     }
 
-    // WORK IN PROGRESS, most of this is wrong hehe but I'm working on it :)
-    //  public static void main(String[] args) throws IOException {
-    //     if (args.length != 2) {
-    //         System.out.println("Usage: java ClientServer.Server <port> <configFilePath>");
-    //         return;
-    //     }
-    //     int port = Integer.parseInt(args[0]);
-    //     String configFilePath = args[1];
+    public static void main(String[] args) throws IOException {
+        int port = 5001;
+        //For my own testing purposes
+        String configFilePath = "/Users/nataliespiska/CSC_340_Project1/ClientServer/ClientServerConfig.txt";
+         if (args.length != 2) {
+             System.out.println("Usage: java ClientServer.Server <port> <configFilePath>");
+             System.out.println("Using default values: java ClientServer.Server " + port + " " + configFilePath);
+         } else {
+            port =  Integer.parseInt(args[0]);
+            configFilePath = args[1];
+         }
+        
+        // Read the configuration file
+        List<Node> nodes = ConfigReader.readConfig(configFilePath, port);
 
-    //     // Read the configuration file
-    //     List<Node> nodes = ConfigReader.readConfig(configFilePath);
+        // Create the server
+        Server server = new Server(port);
 
-    //     // Create the server
-    //     Server server = new Server(port);
+        // Add client nodes to the server
+        for (Node node : nodes) {
+            server.addClientNode(node);
+        }
 
-    //     // Add client nodes to the server
-    //     for (Node node : nodes) {
-    //         server.addClientNode(node);
-    //     }
+        // Start the server
+        server.start();
+    }
 
-    //     // Start the server
-    //     server.start();
-    // }
 }
