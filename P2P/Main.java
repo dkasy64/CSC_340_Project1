@@ -30,7 +30,7 @@ public class Main {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                }, 0, 30, TimeUnit.SECONDS);
+                }, 0, 10, TimeUnit.SECONDS);
             }
         } catch (IOException e) {
             e.printStackTrace();

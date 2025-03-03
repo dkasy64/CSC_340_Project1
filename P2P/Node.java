@@ -80,6 +80,7 @@ public class Node {
 
                     // Update last heartbeat time
                     lastHeartbeatTimes.put(receivedPacket.getNodeID(), System.currentTimeMillis());
+                    System.out.println("Received heartbeat from Node " + receivedPacket.getNodeID() + " at " + System.currentTimeMillis());
 
                     // Display status
                     displayStatus();
@@ -96,7 +97,7 @@ public class Node {
         for (Map.Entry<Integer, Long> entry : lastHeartbeatTimes.entrySet()) {
             int nodeID = entry.getKey();
             long lastHeartbeat = entry.getValue();
-            String status = (System.currentTimeMillis() - lastHeartbeat < 40000) ? "Alive" : "Dead";
+            String status = (System.currentTimeMillis() - lastHeartbeat < 10000) ? "Alive" : "Dead"; // 10-second timeout
             System.out.println(nodeID + "\t" + status);
         }
         System.out.println("-------------------");

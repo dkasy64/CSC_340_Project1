@@ -1,6 +1,10 @@
 # P2P Mode Configuration
 # Format: NodeID, IP Address, Port, Home Directory Path
 
+<<<<<<< HEAD
 1, 10.111.155.163, 5001, /home/node1
+=======
+1, 10.111.155.164, 5001, /home/node1
+>>>>>>> 8975ee28815ed652ee4a3cd529a199ff811d2168
 2, 10.111.145.237, 5002, /home/node2
 3, 10.111.155.193, 5003, /home/node3
