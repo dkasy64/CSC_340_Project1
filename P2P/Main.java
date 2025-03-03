@@ -24,7 +24,7 @@ public class Main {
             for (Node node : nodes) {
                 scheduler.scheduleAtFixedRate(() -> {
                     try {
-                        int delay = secureRandom.nextInt(30000); // Random delay between 0 and 30 seconds
+                        int delay = secureRandom.nextInt(10000); // Random delay between 0 and 30 seconds
                         Thread.sleep(delay);
                         node.sendHeartbeat(nodes); // Send heartbeat
                     } catch (InterruptedException e) {
