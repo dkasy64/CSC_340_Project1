@@ -6,7 +6,7 @@ import java.util.*;
 public class ConfigReader {
     public static List<Node> readConfig(String filePath) throws IOException {
         List<Node> nodes = new ArrayList<>();
-        BufferedReader reader = new BufferedReader(new FileReader("config.txt"));
+        BufferedReader reader = new BufferedReader(new FileReader(filePath));
         String line;
 
         while ((line = reader.readLine()) != null) {
@@ -17,10 +17,9 @@ public class ConfigReader {
             int nodeID = Integer.parseInt(parts[0].trim());
             String ipAddress = parts[1].trim();
             int port = Integer.parseInt(parts[2].trim());
-            String homeDir = parts[3].trim();
 
-            Node nodeInfo = new Node(nodeID, ipAddress, port, homeDir);
-            nodes.add(nodeInfo);
+            Node node = new Node(nodeID, ipAddress, port);
+            nodes.add(node);
         }
 
         reader.close();
