@@ -50,7 +50,7 @@ public class Server {
     private void broadcastStatus() {
         while (true) {
             try {
-                Thread.sleep(5000); //5 second updates
+                Thread.sleep(1000); //5 second updates
                 long currentTime = System.currentTimeMillis();
                 StringBuilder statusMessage = new StringBuilder("STATUS_UPDATE " + counter++);
                 for (Map.Entry<Integer, String> entry : clientStatus.entrySet()) {
