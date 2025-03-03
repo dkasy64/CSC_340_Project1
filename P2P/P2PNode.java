@@ -11,7 +11,7 @@ public class P2PNode {
     private DatagramSocket socket; // UDP socket for communication
     private SecureRandom random; // SecureRandom for generating random intervals
     private final Map<InetSocketAddress, Long> lastHeartbeatTimes; // Map to store last heartbeat times
-    private static final long HEARTBEAT_TIMEOUT = 60000; // Timeout in milliseconds (e.g., 60 seconds)
+    private static final long HEARTBEAT_TIMEOUT = 30000; // Timeout in milliseconds (e.g., 60 seconds)
 
     public P2PNode(int port, List<InetSocketAddress> peerAddresses) {
         this.port = port;
