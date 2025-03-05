@@ -1,7 +1,5 @@
 package P2P;
-
 import java.io.IOException;
-import java.security.SecureRandom;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -12,25 +10,23 @@ public class Main {
         try {
             // Read configuration
             List<Node> nodes = ConfigReader.readConfig("config.txt");
-
+            
+            // Register nodes with each other
+            for (Node node : nodes) {
+                node.registerNodes(nodes);
+            }
+            
             // Initialize nodes and start listening
             for (Node node : nodes) {
                 node.listen();
             }
-
-            // Start heartbeat synchronization
-            ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-            SecureRandom secureRandom = new SecureRandom(); // Use SecureRandom instead of Random
+            
+            // Start heartbeat synchronization at a fixed rate
+            ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(nodes.size());
             for (Node node : nodes) {
                 scheduler.scheduleAtFixedRate(() -> {
-                    try {
-                        int delay = secureRandom.nextInt(30000); // Random delay between 0 and 30 seconds
-                        Thread.sleep(delay);
-                        node.sendHeartbeat(nodes); // Send heartbeat
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }, 0, 10, TimeUnit.SECONDS);
+                    node.sendHeartbeat(nodes); // Send heartbeat every 5 seconds
+                }, 0, 15, TimeUnit.SECONDS);
             }
         } catch (IOException e) {
             e.printStackTrace();
