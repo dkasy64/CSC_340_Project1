@@ -1,4 +1,5 @@
 package P2P;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -20,12 +21,17 @@ public class Main {
             for (Node node : nodes) {
                 node.listen();
             }
+
+            // Print file listings for each node based on their home directory
+            for (Node node : nodes) {
+                node.listFilesInDirectory();
+            }
             
             // Start heartbeat synchronization at a fixed rate
             ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(nodes.size());
             for (Node node : nodes) {
                 scheduler.scheduleAtFixedRate(() -> {
-                    node.sendHeartbeat(nodes); // Send heartbeat every 5 seconds
+                    node.sendHeartbeat(nodes); // Send heartbeat every 15 seconds
                 }, 0, 15, TimeUnit.SECONDS);
             }
         } catch (IOException e) {

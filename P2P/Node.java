@@ -3,6 +3,7 @@ package P2P;
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.text.SimpleDateFormat;
 
 public class Node {
@@ -11,13 +12,18 @@ public class Node {
     private int port;
     private DatagramSocket socket;
     private Map<Integer, Long> lastHeartbeatTimes; // Tracks last heartbeat time for each node
+    private Map<Integer, String> nodeFileListings; // Stores file listings for each node
     private SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss.SSS");
 
-    public Node(int nodeID, String ipAddress, int port) {
+    private String homeDirectoryPath;
+
+    public Node(int nodeID, String ipAddress, int port, String homeDirectoryPath) {
         this.nodeID = nodeID;
         this.ipAddress = ipAddress;
         this.port = port;
-        this.lastHeartbeatTimes = new HashMap<>(); // Ensure this is empty
+        this.homeDirectoryPath = homeDirectoryPath;
+        this.lastHeartbeatTimes = new HashMap<>();
+        this.nodeFileListings = new HashMap<>();
         System.out.println("Initial state: All nodes are Dead");
         initializeSocket();
     }
@@ -49,7 +55,12 @@ public class Node {
     // Method to send a heartbeat to all other nodes
     public void sendHeartbeat(List<Node> nodes) {
         try {
-            ProtocolPacket packet = new ProtocolPacket("1.0", 0, 0, "reserved", nodeID, System.currentTimeMillis());
+            // Get current file listing
+            String fileList = getFileNames();
+            
+            // Create a protocol packet that includes file listing
+            ProtocolPacket packet = new ProtocolPacket(
+                "1.0", 0, 0, "reserved", nodeID, System.currentTimeMillis(), fileList);
 
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ObjectOutputStream oos = new ObjectOutputStream(baos);
@@ -69,24 +80,40 @@ public class Node {
         }
     }
 
+    public void listFilesInDirectory() {
+        File folder = new File(homeDirectoryPath);
+        File[] listOfFiles = folder.listFiles();
+
+        if (listOfFiles != null) {
+            System.out.println("Files in " + homeDirectoryPath + " for Node " + nodeID + ":");
+            for (File file : listOfFiles) {
+                if (file.isFile()) {
+                    System.out.println(file.getName());
+                }
+            }
+        } else {
+            System.out.println("The directory " + homeDirectoryPath + " does not exist or is not a directory.");
+        }
+    }
+
     public void listen() {
         new Thread(() -> {
             while (true) {
                 try {
-                    byte[] buffer = new byte[1024];
+                    byte[] buffer = new byte[4096]; // Larger buffer to accommodate file listings
                     DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
                     socket.receive(packet);
 
                     // Get the sender's actual IP address from the packet
                     InetAddress senderAddress = packet.getAddress();
-                    int senderPort = packet.getPort();
                     
                     ByteArrayInputStream bais = new ByteArrayInputStream(packet.getData());
                     ObjectInputStream ois = new ObjectInputStream(bais);
                     ProtocolPacket receivedPacket = (ProtocolPacket) ois.readObject();
-
+                    
                     int claimedSenderID = receivedPacket.getNodeID();
                     long receivedTime = System.currentTimeMillis();
+                    String receivedFileList = receivedPacket.getFileList();
 
                     // Look up the node that matches the claimed sender ID
                     boolean validSender = false;
@@ -103,13 +130,16 @@ public class Node {
 
                     if (validSender) {
                         lastHeartbeatTimes.put(claimedSenderID, receivedTime);
+                        // Store the file listing from this node
+                        nodeFileListings.put(claimedSenderID, receivedFileList);
+                        
                         System.out.println("[OK] Received heartbeat from Node " + claimedSenderID + 
-                                          " at " + timeFormat.format(new Date()) + 
-                                          " (IP: " + senderAddress.getHostAddress() + ")");
+                                         " at " + timeFormat.format(new Date()) + 
+                                         " (IP: " + senderAddress.getHostAddress() + ")");
                     } else {
                         System.out.println("[WARN] Received packet claiming to be from Node " + claimedSenderID + 
-                                          " but source IP " + senderAddress.getHostAddress() + 
-                                          " doesn't match expected IP for that node");
+                                         " but source IP " + senderAddress.getHostAddress() + 
+                                         " doesn't match expected IP for that node");
                     }
 
                     displayStatus();
@@ -131,7 +161,7 @@ public class Node {
             }
         }
     }
-    
+
     // Helper class to store node information
     private static class NodeInfo {
         String ipAddress;
@@ -145,39 +175,68 @@ public class Node {
 
     private void displayStatus() {
         System.out.println("Debug: Current lastHeartbeatTimes = " + lastHeartbeatTimes);
-        System.out.println("Node ID\tStatus\tLast Heartbeat");
+        System.out.println("Node ID\tStatus\tLast Heartbeat\tFiles in Directory");
         long currentTime = System.currentTimeMillis();
         List<Integer> deadNodes = new ArrayList<>();
 
         for (int nodeID = 1; nodeID <= 3; nodeID++) { // Assuming 3 nodes
-            if (nodeID == this.nodeID) { // A node should never mark itself as dead
-                System.out.println(nodeID + "\tAlive\tSelf");
-                continue;
-            }
+            String status;
+            String lastHeartbeatTime;
+            String fileNames = "";
 
-            // Only mark as alive if a heartbeat was received within the last 10 seconds
-            if (lastHeartbeatTimes.containsKey(nodeID)) {
+            // For the current node, always get the current file listing
+            if (nodeID == this.nodeID) {
+                fileNames = getFileNames();
+                status = "Alive";
+                lastHeartbeatTime = "Self";
+            } else if (lastHeartbeatTimes.containsKey(nodeID)) {
                 long lastHeartbeat = lastHeartbeatTimes.get(nodeID);
                 if (currentTime - lastHeartbeat < 10000) {
-                    System.out.println(nodeID + "\tAlive\t" + 
-                                      timeFormat.format(new Date(lastHeartbeat)) + 
-                                      " (" + (currentTime - lastHeartbeat) + "ms ago)");
+                    status = "Alive";
+                    lastHeartbeatTime = timeFormat.format(new Date(lastHeartbeat)) + 
+                                       " (" + (currentTime - lastHeartbeat) + "ms ago)";
+                    
+                    // Show file listing only for alive nodes
+                    fileNames = nodeFileListings.getOrDefault(nodeID, "No files reported");
                 } else {
-                    System.out.println(nodeID + "\tDead\t" + 
-                                      timeFormat.format(new Date(lastHeartbeat)) + 
-                                      " (" + (currentTime - lastHeartbeat) + "ms ago)");
+                    status = "Dead";
+                    lastHeartbeatTime = timeFormat.format(new Date(lastHeartbeat)) + 
+                                       " (" + (currentTime - lastHeartbeat) + "ms ago)";
                     deadNodes.add(nodeID); // Mark for removal
+                    
+                    // Don't show file listing for dead nodes
+                    fileNames = "Node is dead";
                 }
             } else {
-                System.out.println(nodeID + "\tDead\tNever");
+                status = "Dead";
+                lastHeartbeatTime = "Never";
+                fileNames = "Node is dead";
             }
+
+            System.out.println(nodeID + "\t" + status + "\t" + lastHeartbeatTime + "\t\t" + fileNames);
         }
 
         // Remove stale heartbeats to avoid false positives
         for (int nodeID : deadNodes) {
             lastHeartbeatTimes.remove(nodeID);
+            // Also remove file listings for dead nodes
+            nodeFileListings.remove(nodeID);
         }
 
         System.out.println("-------------------");
+    }
+
+    // Helper method to get file names
+    private String getFileNames() {
+        File folder = new File(homeDirectoryPath);
+        File[] listOfFiles = folder.listFiles();
+        if (listOfFiles == null) {
+            return "No files or directory not found";
+        }
+        
+        return Arrays.stream(listOfFiles)
+                     .filter(File::isFile)
+                     .map(File::getName)
+                     .collect(Collectors.joining(", "));
     }
 }
