@@ -4,8 +4,13 @@ import java.io.*;
 import java.util.*;
 
 public class ConfigReader {
-    public static List<Node> readConfig(String filePath, int serverPort) throws IOException {
-        System.out.println("Reading configuration file: " + filePath);
+    private static String CONFIG_FILE = "/Users/nataliespiska/CSC_340_Project1/ClientServer/ClientServerConfig.txt";
+    public static List<Node> readConfig(String filePath) throws IOException {
+    
+        if (filePath == null) {
+                filePath = CONFIG_FILE;
+        }
+
         List<Node> nodes = new ArrayList<>();
         BufferedReader reader = new BufferedReader(new FileReader(filePath));
         String line;
@@ -16,16 +21,8 @@ public class ConfigReader {
             }
             String[] parts = line.split(",");
             int nodeID = Integer.parseInt(parts[0].trim());
-            String ipAddress = parts[1].trim();
-            int port = Integer.parseInt(parts[2].trim());
-
-            //makes sure the Server node is not the same port number as the client nodes already exisisting :)
-            if(port == serverPort) {
-                System.out.println("Port ID cannot be the same as the server port, generating new one");
-                port = serverPort + 1000;
-                System.out.println("New port ID: " + port);
-            }
-
+            String ipAddress = parts[1].trim();;
+            int port =  Integer.parseInt(parts[2].trim());;
             String homeDir = parts[3].trim();
 
             Node nodeInfo = new Node(nodeID, ipAddress, port, homeDir);

@@ -1,0 +1,4 @@
+# Client-Server Mode Configuration
+# Format: NodeID, IP Address, Port, Home Directory Path, Role
+
+1, 10.111.155.193, 5001, /home/node1, client
