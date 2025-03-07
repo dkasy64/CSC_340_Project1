@@ -1,5 +1,0 @@
-# Client-Server Mode Configuration
-# Format: NodeID, Home Directory Path
-
-1, 10.111.155.193, 5002,/Users/nataliespiska/CSC_340_Project1/ClientServer/home/homeForNode1
-2, 10.111.155.164, 5003,C:\Users\dawit\OneDrive\Desktop\CSC340Pro1\ClientServer\home\homeForNode1

@@ -14,8 +14,15 @@ public class Node {
     private Map<Integer, Long> lastHeartbeatTimes; // Tracks last heartbeat time for each node
     private Map<Integer, String> nodeFileListings; // Stores file listings for each node
     private SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss.SSS");
-
     private String homeDirectoryPath;
+
+    //Cosmetics to make it *pretty*
+    public static final String ANSI_RED = "\u001B[31m";
+    public static final String ANSI_GREEN = "\u001B[32m";
+    public static final String ANSI_YELLOW = "\u001B[33m";
+    public static final String ANSI_BLUE = "\u001B[34m";
+    public static final String ANSI_BOLD = "\u001B[1m";
+    public static final String ANSI_RESET = "\u001B[0m";
 
     public Node(int nodeID, String ipAddress, int port, String homeDirectoryPath) {
         this.nodeID = nodeID;
@@ -72,7 +79,7 @@ public class Node {
                     InetAddress address = InetAddress.getByName(node.getIpAddress());
                     DatagramPacket datagramPacket = new DatagramPacket(data, data.length, address, node.getPort());
                     socket.send(datagramPacket);
-                    System.out.println("[SENT] Heartbeat to Node " + node.getNodeID() + " at " + timeFormat.format(new Date()));
+                    //System.out.println("[SENT] Heartbeat to Node " + node.getNodeID() + " at " + timeFormat.format(new Date()));
                 }
             }
         } catch (IOException e) {
@@ -133,13 +140,13 @@ public class Node {
                         // Store the file listing from this node
                         nodeFileListings.put(claimedSenderID, receivedFileList);
                         
-                        System.out.println("[OK] Received heartbeat from Node " + claimedSenderID + 
-                                         " at " + timeFormat.format(new Date()) + 
-                                         " (IP: " + senderAddress.getHostAddress() + ")");
+                        //System.out.println("[OK] Received heartbeat from Node " + claimedSenderID + 
+                                         //" at " + timeFormat.format(new Date()) + 
+                                         //" (IP: " + senderAddress.getHostAddress() + ")");
                     } else {
-                        System.out.println("[WARN] Received packet claiming to be from Node " + claimedSenderID + 
-                                         " but source IP " + senderAddress.getHostAddress() + 
-                                         " doesn't match expected IP for that node");
+                        //System.out.println("[WARN] Received packet claiming to be from Node " + claimedSenderID + 
+                                         //" but source IP " + senderAddress.getHostAddress() + 
+                                         //" doesn't match expected IP for that node");
                     }
 
                     displayStatus();
@@ -174,12 +181,12 @@ public class Node {
     }
 
     private void displayStatus() {
-        System.out.println("Debug: Current lastHeartbeatTimes = " + lastHeartbeatTimes);
-        System.out.println("Node ID\tStatus\tLast Heartbeat\tFiles in Directory");
+        //System.out.println("Debug: Current lastHeartbeatTimes = " + lastHeartbeatTimes);
+        System.out.println(ANSI_BOLD + "Node ID\tStatus\tLast Heartbeat\tFiles in Directory" + ANSI_RESET);
         long currentTime = System.currentTimeMillis();
         List<Integer> deadNodes = new ArrayList<>();
 
-        for (int nodeID = 1; nodeID <= 3; nodeID++) { // Assuming 3 nodes
+        for (int nodeID = 1; nodeID <= 6; nodeID++) { // Assuming 3 nodes
             String status;
             String lastHeartbeatTime;
             String fileNames = "";
@@ -187,33 +194,33 @@ public class Node {
             // For the current node, always get the current file listing
             if (nodeID == this.nodeID) {
                 fileNames = getFileNames();
-                status = "Alive";
+                status = ANSI_GREEN + "Alive" + ANSI_RESET;
                 lastHeartbeatTime = "Self";
             } else if (lastHeartbeatTimes.containsKey(nodeID)) {
                 long lastHeartbeat = lastHeartbeatTimes.get(nodeID);
                 if (currentTime - lastHeartbeat < 10000) {
-                    status = "Alive";
+                    status = ANSI_GREEN + "Alive" + ANSI_RESET;
                     lastHeartbeatTime = timeFormat.format(new Date(lastHeartbeat)) + 
                                        " (" + (currentTime - lastHeartbeat) + "ms ago)";
                     
                     // Show file listing only for alive nodes
                     fileNames = nodeFileListings.getOrDefault(nodeID, "No files reported");
                 } else {
-                    status = "Dead";
+                    status = ANSI_RED + "Dead" + ANSI_RESET;
                     lastHeartbeatTime = timeFormat.format(new Date(lastHeartbeat)) + 
                                        " (" + (currentTime - lastHeartbeat) + "ms ago)";
                     deadNodes.add(nodeID); // Mark for removal
                     
                     // Don't show file listing for dead nodes
-                    fileNames = "Node is dead";
+                    fileNames = ANSI_RED + "Node is dead" + ANSI_RESET;
                 }
             } else {
-                status = "Dead";
+                status = ANSI_RED + "Dead" + ANSI_RESET;
                 lastHeartbeatTime = "Never";
-                fileNames = "Node is dead";
+                fileNames = ANSI_RED + "Node is dead" + ANSI_RESET;
             }
 
-            System.out.println(nodeID + "\t" + status + "\t" + lastHeartbeatTime + "\t\t" + fileNames);
+            System.out.println(nodeID + "\t" + status + "\t" + lastHeartbeatTime + "\t\t" + ANSI_YELLOW + fileNames + ANSI_RESET);
         }
 
         // Remove stale heartbeats to avoid false positives
@@ -223,7 +230,7 @@ public class Node {
             nodeFileListings.remove(nodeID);
         }
 
-        System.out.println("-------------------");
+        System.out.println("-------------------\n");
     }
 
     // Helper method to get file names
