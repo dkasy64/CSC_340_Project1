@@ -32,7 +32,7 @@ public class Main {
             for (Node node : nodes) {
                 scheduler.scheduleAtFixedRate(() -> {
                     node.sendHeartbeat(nodes); // Send heartbeat every 15 seconds
-                }, 0, 30, TimeUnit.SECONDS);
+                }, 0, 15, TimeUnit.SECONDS);
             }
         } catch (IOException e) {
             e.printStackTrace();
