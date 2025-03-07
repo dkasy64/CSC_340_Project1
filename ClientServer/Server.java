@@ -17,6 +17,14 @@ public class Server {
     private static final long TIMEOUT = 5000; //30 seconds
     private int counter;
 
+    //Cosmetics to make it *pretty*
+    public static final String ANSI_RED = "\u001B[31m";
+    public static final String ANSI_GREEN = "\u001B[32m";
+    public static final String ANSI_YELLOW = "\u001B[33m";
+    public static final String ANSI_BOLD = "\u001B[1m";
+    public static final String ANSI_RESET = "\u001B[0m";
+
+
     //making all the maps and setting the port
     public Server(int port) {
         this.port = port;
@@ -38,7 +46,6 @@ public class Server {
  //sends a message to a client using UDP, which is used in the broadcast message method
     //to then send a status message to all of the clients, so they all know who's alive or not
     public void sendUpdate(String message, String clientIP, int clientPort) throws Exception {
-        System.out.println("Sending: " + message + " to " + clientIP + ":" + clientPort);
         if (clientPort == 0) {
             System.out.println("Invalid client port: " + clientPort);
             return;
@@ -52,42 +59,43 @@ public class Server {
     }
 
 
-  //this method broadcasts the status of all of the clients to all of the clients, so
-    //they all know what's what, and also prints out the status of each node to da console
+    //This method is used to broadcast the status of the server to all the clients, as well as
+    //to update the status of the clients as the server receives updates from the clients
     private void broadcastStatus() {
         while (true) {
             try {
                 Thread.sleep(TIMEOUT); //updates must match the timeout
                 long currentTime = System.currentTimeMillis();
-                StringBuilder statusMessage = new StringBuilder("STATUS_UPDATE " + counter++);
+                StringBuilder statusMessage = new StringBuilder(ANSI_BOLD + "\nSTATUS_UPDATE " + counter++ + ANSI_RESET);
                 StringBuilder statusMessageForNodes = new StringBuilder("SERVER_STATUS_REPLY "+ counter);
                 for (Map.Entry<Integer, String> entry : clientStatus.entrySet()) {
                     int clientID = entry.getKey();
                     long lastHeartBeat = clientLastHeartbeat.get(clientID);
                     if (currentTime - lastHeartBeat <= TIMEOUT) {
-                        statusMessage.append("\n").append("Node").append(clientID).append(" : Avaliable");
+                        statusMessage.append("\n").append("Node").append(clientID).append(": ").append(ANSI_GREEN).append("Avaliable").append(ANSI_RESET);
                     } else {
                         clientDirectoryListing.remove(clientID);
-                        statusMessage.append("\n").append("Node").append(clientID).append(" : Unavaliable");
+                        statusMessage.append("\n").append("Node").append(clientID).append(": ").append(ANSI_RED).append("Unavaliable").append(ANSI_RESET);
                     }
 
                 }
 
+                //this basically sends the directory listing of the clients to the server
                 if(clientDirectoryListing.isEmpty()) {
-                    statusMessage.append("\nDIRECTORY LISTING FROM AVAILABLE NODES: ");
-                    statusMessage.append("\nNo nodes available");
-                    statusMessageForNodes.append("\nDIRECTORY LISTING FROM AVAILABLE NODES: ");
-                    statusMessageForNodes.append("\nNo nodes available");
+                    statusMessage.append(ANSI_BOLD).append("\nDIRECTORY LISTING FROM AVAILABLE NODES: ").append(ANSI_RESET);
+                    statusMessage.append(ANSI_RED).append("\nNo nodes available").append(ANSI_RESET);
+                    statusMessageForNodes.append(ANSI_BOLD).append("\n\nDIRECTORY LISTING FROM AVAILABLE NODES: ").append(ANSI_RESET);
+                    statusMessageForNodes.append(ANSI_RED).append("\nNo nodes available").append(ANSI_RESET);
                 } else {
-                    statusMessage.append("\nDIRECTORY LISTING FROM AVAILABLE NODES: ");
-                    statusMessageForNodes.append("\nDIRECTORY LISTING FROM AVAILABLE NODES: ");
+                    statusMessage.append(ANSI_BOLD).append("\nDIRECTORY LISTING FROM AVAILABLE NODES: ").append(ANSI_RESET);
+                    statusMessageForNodes.append(ANSI_BOLD).append("\n\nDIRECTORY LISTING FROM AVAILABLE NODES: ").append(ANSI_RESET);
                 }
 
                 for (Map.Entry<Integer, String> entry : clientDirectoryListing.entrySet()) {
                     int clientID = entry.getKey();
                     String directoryListing = clientDirectoryListing.get(clientID);
-                    statusMessage.append("\n").append("Node").append(clientID).append(" : ").append(directoryListing);
-                    statusMessageForNodes.append("\n").append("Node").append(clientID).append(" : ").append(directoryListing);
+                    statusMessage.append(ANSI_YELLOW).append("\n").append("Node").append(clientID).append(" : ").append(directoryListing).append(ANSI_RESET);
+                    statusMessageForNodes.append(ANSI_YELLOW).append("\n").append("Node").append(clientID).append(" : ").append(directoryListing).append(ANSI_RESET);
                 }
 
                 String message = statusMessage.toString();
@@ -112,17 +120,17 @@ public class Server {
         new Thread(this::receivePackets).start();
     }
 
-
+    //This method is used to receive packets from the clients, and then update the server
+    //along with the file directory listing of the clients
     private void receivePackets() {
         try (DatagramSocket socket = new DatagramSocket(port)) {
             byte[] buffer = new byte[1024];
-            System.out.println("Server started at 127.0.0.1: " + port);
+            System.out.println("Server started at: " + port);
 
             while (true) {
                 DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
                 socket.receive(packet);
                 String message = new String(packet.getData(), 0, packet.getLength());
-                System.out.println("Received: " + message);
                 String[] parts = message.split("\\|");
                 String messageType = parts[0];
                 int nodeId = Integer.parseInt(parts[1]);
@@ -131,7 +139,7 @@ public class Server {
                     clientLastHeartbeat.put(nodeId, System.currentTimeMillis());
                     clientStatus.put(nodeId, "Available");
                 } else if (messageType.equals("DIRECTORY_LISTING")) {
-                    try{
+                    try {
                         String directoryListing = parts[2];
                         clientDirectoryListing.put(nodeId, directoryListing);    
                     } catch (Exception e) {
@@ -149,25 +157,27 @@ public class Server {
         }
     }
 
+    //main method to run the server
     public static void main(String[] args) throws IOException {
         int port = 5001;
-        //For my own testing purposes
         String configFilePath = null;
-         if (args.length != 2) {
-             System.out.println("Usage: java ClientServer.Server <port> <configFilePath>");
-             System.out.println("Using default port 5001 and default config file path");
-         } else {
+
+        if (args.length != 2) {
+            //You need client config file path to run the server
+            //example: java ClientServer/Server 5001 /Users/nataliespiska/CSC_340_Project1/ClientServer/ClientConfig.txt
+            System.out.println("Usage: java ClientServer.Server <port> <clientConfigFilePath>");
+            return;
+        } else {
             port =  Integer.parseInt(args[0]);
             configFilePath = args[1];
-         }
+        }
 
-        // Create the server
+        //create a new server
         Server server = new Server(port);
-
-        // Read the configuration file
+        //read the configuration file
         List<Node> nodes = ConfigReader.readConfig(configFilePath);
-        
-        // Add client nodes to the server
+
+        //add client nodes to the server
         for (Node node : nodes) {
             server.addClientNode(node);
         }
