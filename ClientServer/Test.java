@@ -1,8 +1,5 @@
 package ClientServer;
 
-import ClientServer.Server;
-import ClientServer.Client;
-
 public class Test {
     public static void main(String[] args) throws Exception {
         // Create server node

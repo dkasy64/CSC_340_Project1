@@ -1,5 +1,7 @@
 package ClientServer;
 
+import java.io.File;
+
 public class Node {
     private int nodeID;
     private String ipAddress;
@@ -27,5 +29,17 @@ public class Node {
 
     public String getHomeDir() {
         return homeDir;
+    }
+
+    public String getFileNames() {
+        File directory = new File(homeDir);
+        String returnString = "";
+        String[] files = directory.list();
+        if (files != null) {
+            returnString = String.join(", ", files);
+        } else {
+            returnString = "No files found or directory does not exist";
+        }
+        return returnString;
     }
 }

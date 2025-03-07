@@ -12,8 +12,9 @@ public class Server {
     private int port;
     private Map<Integer, Node> clientNodes;
     private Map<Integer, String> clientStatus;
+    private Map<Integer, String> clientDirectoryListing;
     private Map<Integer, Long> clientLastHeartbeat;
-    private static final long TIMEOUT = 30000; //30 seconds
+    private static final long TIMEOUT = 5000; //30 seconds
     private int counter;
 
     //making all the maps and setting the port
@@ -21,6 +22,7 @@ public class Server {
         this.port = port;
         this.clientNodes = new HashMap<>();
         this.clientStatus = new HashMap<>();
+        this.clientDirectoryListing = new HashMap<>();
         this.clientLastHeartbeat = new HashMap<>();
         this.counter = 1;
     }
@@ -33,9 +35,14 @@ public class Server {
         clientLastHeartbeat.put(node.getNodeID(), System.currentTimeMillis());
     }
 
-    //sends a message to a client using UDP, which is used in the broadcast message method
+ //sends a message to a client using UDP, which is used in the broadcast message method
     //to then send a status message to all of the clients, so they all know who's alive or not
     public void sendUpdate(String message, String clientIP, int clientPort) throws Exception {
+        System.out.println("Sending: " + message + " to " + clientIP + ":" + clientPort);
+        if (clientPort == 0) {
+            System.out.println("Invalid client port: " + clientPort);
+            return;
+        }
         DatagramSocket socket = new DatagramSocket();
         InetAddress clientAddress = InetAddress.getByName(clientIP);
         byte[] buffer = message.getBytes();
@@ -45,30 +52,53 @@ public class Server {
     }
 
 
-    //this method broadcasts the status of all of the clients to all of the clients, so
+  //this method broadcasts the status of all of the clients to all of the clients, so
     //they all know what's what, and also prints out the status of each node to da console
     private void broadcastStatus() {
         while (true) {
             try {
-                Thread.sleep(5000); //5 second updates
+                Thread.sleep(TIMEOUT); //updates must match the timeout
                 long currentTime = System.currentTimeMillis();
                 StringBuilder statusMessage = new StringBuilder("STATUS_UPDATE " + counter++);
+                StringBuilder statusMessageForNodes = new StringBuilder("SERVER_STATUS_REPLY "+ counter);
                 for (Map.Entry<Integer, String> entry : clientStatus.entrySet()) {
                     int clientID = entry.getKey();
                     long lastHeartBeat = clientLastHeartbeat.get(clientID);
-                    clientLastHeartbeat.put(clientID, currentTime);
                     if (currentTime - lastHeartBeat <= TIMEOUT) {
                         statusMessage.append("\n").append("Node").append(clientID).append(" : Avaliable");
                     } else {
+                        clientDirectoryListing.remove(clientID);
                         statusMessage.append("\n").append("Node").append(clientID).append(" : Unavaliable");
                     }
+
                 }
+
+                if(clientDirectoryListing.isEmpty()) {
+                    statusMessage.append("\nDIRECTORY LISTING FROM AVAILABLE NODES: ");
+                    statusMessage.append("\nNo nodes available");
+                    statusMessageForNodes.append("\nDIRECTORY LISTING FROM AVAILABLE NODES: ");
+                    statusMessageForNodes.append("\nNo nodes available");
+                } else {
+                    statusMessage.append("\nDIRECTORY LISTING FROM AVAILABLE NODES: ");
+                    statusMessageForNodes.append("\nDIRECTORY LISTING FROM AVAILABLE NODES: ");
+                }
+
+                for (Map.Entry<Integer, String> entry : clientDirectoryListing.entrySet()) {
+                    int clientID = entry.getKey();
+                    String directoryListing = clientDirectoryListing.get(clientID);
+                    statusMessage.append("\n").append("Node").append(clientID).append(" : ").append(directoryListing);
+                    statusMessageForNodes.append("\n").append("Node").append(clientID).append(" : ").append(directoryListing);
+                }
+
                 String message = statusMessage.toString();
+                String messageForNodes = statusMessageForNodes.toString();
                 System.out.println(message);
-                for (Map.Entry<Integer, String> entry : clientStatus.entrySet()) {
+
+                //only send update to nodes which are available
+                for (Map.Entry<Integer, String> entry : clientDirectoryListing.entrySet()) {
                     Node clientNode = clientNodes.get(entry.getKey());
                     if (clientNode != null) {
-                        sendUpdate(message, clientNode.getIpAddress(), clientNode.getPort());
+                        sendUpdate(messageForNodes, clientNode.getIpAddress(), clientNode.getPort());
                     }
                 }
             } catch (Exception e) {
@@ -79,26 +109,64 @@ public class Server {
 
     public void start() {
         new Thread(this::broadcastStatus).start();
+        new Thread(this::receivePackets).start();
+    }
+
+
+    private void receivePackets() {
+        try (DatagramSocket socket = new DatagramSocket(port)) {
+            byte[] buffer = new byte[1024];
+            System.out.println("Server started at 127.0.0.1: " + port);
+
+            while (true) {
+                DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+                socket.receive(packet);
+                String message = new String(packet.getData(), 0, packet.getLength());
+                System.out.println("Received: " + message);
+                String[] parts = message.split("\\|");
+                String messageType = parts[0];
+                int nodeId = Integer.parseInt(parts[1]);
+
+                if (messageType.equals("HEARTBEAT")) {
+                    clientLastHeartbeat.put(nodeId, System.currentTimeMillis());
+                    clientStatus.put(nodeId, "Available");
+                } else if (messageType.equals("DIRECTORY_LISTING")) {
+                    try{
+                        String directoryListing = parts[2];
+                        clientDirectoryListing.put(nodeId, directoryListing);    
+                    } catch (Exception e) {
+                        clientDirectoryListing.put(nodeId, "No files found or directory does not exist.");
+                    }
+                } else if (messageType.equals("STATUS_REQUEST")) {
+                    String response = "STATUS_RESPONSE|" + nodeId + "|OK";
+                    byte[] responseData = response.getBytes();
+                    DatagramPacket responsePacket = new DatagramPacket(responseData, responseData.length, packet.getAddress(), packet.getPort());
+                    socket.send(responsePacket);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public static void main(String[] args) throws IOException {
         int port = 5001;
         //For my own testing purposes
-        String configFilePath = "/Users/nataliespiska/CSC_340_Project1/ClientServer/ClientServerConfig.txt";
+        String configFilePath = null;
          if (args.length != 2) {
              System.out.println("Usage: java ClientServer.Server <port> <configFilePath>");
-             System.out.println("Using default values: java ClientServer.Server " + port + " " + configFilePath);
+             System.out.println("Using default port 5001 and default config file path");
          } else {
             port =  Integer.parseInt(args[0]);
             configFilePath = args[1];
          }
-        
-        // Read the configuration file
-        List<Node> nodes = ConfigReader.readConfig(configFilePath, port);
 
         // Create the server
         Server server = new Server(port);
 
+        // Read the configuration file
+        List<Node> nodes = ConfigReader.readConfig(configFilePath);
+        
         // Add client nodes to the server
         for (Node node : nodes) {
             server.addClientNode(node);
@@ -107,5 +175,4 @@ public class Server {
         // Start the server
         server.start();
     }
-
 }
