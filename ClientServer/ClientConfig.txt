@@ -2,9 +2,9 @@
 # Format: NodeID, IP Address, Port Number, Home Directory Path
 # Needs to be the client's ip address, port number, and file path
 
-1, 10.111.155.193, 5002, /Users/nataliespiska/CSC_340_Project1/ClientServer/home/homeForNode2
+1, 10.111.155.193, 5002, /Users/nataliespiska/CSC_340_Project1/ClientServer/home/homeForNode1
 2, 10.111.155.193, 5003, /Users/nataliespiska/CSC_340_Project1/ClientServer/home/homeForNode2
-3, 10.111.155.193, 5004, /Users/nataliespiska/CSC_340_Project1/ClientServer/home/homeForNode3
+2, 10.111.155.193, 5004, /Users/nataliespiska/CSC_340_Project1/ClientServer/home/homeForNode3
 4, 10.111.155.193, 5005, /Users/nataliespiska/CSC_340_Project1/ClientServer/home/homeForNode4
 5, 10.111.155.193, 5006, /Users/nataliespiska/CSC_340_Project1/ClientServer/home/homeForNode5
 6, 10.111.155.193, 5007, /Users/nataliespiska/CSC_340_Project1/ClientServer/home/homeForNode6

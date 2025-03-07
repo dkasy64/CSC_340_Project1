@@ -2,4 +2,4 @@
 # Format: NodeID, Server IP Address, ServerPort, Home Directory Path
 # Put in the ip address to the server in this file
 
-1, 10.111.155.164, 5001, /notneeded/
+1, 10.111.155.193, 5001, /notneeded/
