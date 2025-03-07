@@ -4,7 +4,7 @@ import java.io.*;
 import java.util.*;
 
 public class ConfigReader {
-    private static String CONFIG_FILE = "/Users/nataliespiska/CSC_340_Project1/ClientServer/ClientServerConfig.txt";
+    private static String CONFIG_FILE = "ClientServer/ClientServerConfig.txt";
     public static List<Node> readConfig(String filePath) throws IOException {
     
         if (filePath == null) {
