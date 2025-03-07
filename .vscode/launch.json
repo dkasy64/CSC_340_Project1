@@ -6,6 +6,20 @@
     "configurations": [
         {
             "type": "java",
+            "name": "Client",
+            "request": "launch",
+            "mainClass": "ClientServer.Client",
+            "projectName": "CSC_340_Project1_9d69e514"
+        },
+        {
+            "type": "java",
+            "name": "Main",
+            "request": "launch",
+            "mainClass": "P2P.Main",
+            "projectName": "CSC_340_Project1_9d69e514"
+        },
+        {
+            "type": "java",
             "name": "Main",
             "request": "launch",
             "mainClass": "P2P.Main",
