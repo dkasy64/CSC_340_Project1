@@ -38,7 +38,7 @@ public class Server {
  //sends a message to a client using UDP, which is used in the broadcast message method
     //to then send a status message to all of the clients, so they all know who's alive or not
     public void sendUpdate(String message, String clientIP, int clientPort) throws Exception {
-        System.out.println("Sending: " + message + " to " + clientIP + ":" + clientPort);
+        //System.out.println("Sending: " + message + " to " + clientIP + ":" + clientPort);
         if (clientPort == 0) {
             System.out.println("Invalid client port: " + clientPort);
             return;
@@ -116,13 +116,13 @@ public class Server {
     private void receivePackets() {
         try (DatagramSocket socket = new DatagramSocket(port)) {
             byte[] buffer = new byte[1024];
-            System.out.println("Server started at 127.0.0.1: " + port);
+            System.out.println("Server started at: " + port);
 
             while (true) {
                 DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
                 socket.receive(packet);
                 String message = new String(packet.getData(), 0, packet.getLength());
-                System.out.println("Received: " + message);
+                //System.out.println("Received: " + message);
                 String[] parts = message.split("\\|");
                 String messageType = parts[0];
                 int nodeId = Integer.parseInt(parts[1]);
@@ -154,8 +154,9 @@ public class Server {
         //For my own testing purposes
         String configFilePath = null;
          if (args.length != 2) {
-             System.out.println("Usage: java ClientServer.Server <port> <configFilePath>");
-             System.out.println("Using default port 5001 and default config file path");
+            //You need client config file path to run the server
+            System.out.println("Usage: java ClientServer.Server <port> <clientConfigFilePath>");
+            return;
          } else {
             port =  Integer.parseInt(args[0]);
             configFilePath = args[1];

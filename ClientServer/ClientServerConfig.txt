@@ -1,9 +1,0 @@
-# Client-Server Mode Configuration
-# Format: NodeID, Home Directory Path
-
-1, 127.0.0.1, 5002,/Users/nataliespiska/CSC_340_Project1/ClientServer/home/homeForNode1
-2, 127.0.0.1, 5003,/Users/nataliespiska/CSC_340_Project1/ClientServer/home/homeForNode2
-3, 127.0.0.1, 5004,/Users/nataliespiska/CSC_340_Project1/ClientServer/home/homeForNode3
-4, 127.0.0.1, 5005,/Users/nataliespiska/CSC_340_Project1/ClientServer/home/homeForNode4
-5, 127.0.0.1, 5006,/Users/nataliespiska/CSC_340_Project1/ClientServer/home/homeForNode5
-6, 127.0.0.1, 5007,/Users/nataliespiska/CSC_340_Project1/ClientServer/home/homeForNode6

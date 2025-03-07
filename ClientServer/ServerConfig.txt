@@ -1,0 +1,5 @@
+# Server Configuration
+# Format: NodeID, Server IP Address, ServerPort, Home Directory Path
+
+
+1, 10.111.155.193, 5001, /notneeded/

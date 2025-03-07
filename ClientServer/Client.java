@@ -14,6 +14,8 @@ public class Client {
     private InetAddress serverAddress;
     private int serverPort;
     private SecureRandom random;
+    //put your path here to the server config file
+    private static String serverConfigFilePath = "/Users/nataliespiska/CSC_340_Project1/ClientServer/ServerConfig.txt";
 
     public Client(Node node, String serverIP, int serverPort) throws Exception {
         this.node = node;
@@ -47,16 +49,19 @@ public class Client {
 
     public static void main(String[] args) throws Exception {
         Client client = null;
+        String clientConfigFilePath = null;
         String nodeId;
-        if (args.length != 1) {
-            System.out.println("Usage: java ClientServer.Client <nodeID>");
+        if (args.length != 2) {
+            //use your client config file path here
+            System.out.println("Usage: java ClientServer.Client <nodeID> <clientConfigFilePath>");
             return;
         } else {
+            clientConfigFilePath = args[1];
             nodeId = args[0];
         }
 
         // Read the configuration file
-        List<Node> nodes = ConfigReader.readConfig(null);
+        List<Node> nodes = ConfigReader.readConfig(clientConfigFilePath);
 
         //pick node representing this Client ID
         for (Node node : nodes) {
@@ -68,8 +73,27 @@ public class Client {
         }
 
             DatagramSocket socket = new DatagramSocket();
-            InetAddress serverAddress = InetAddress.getByName("127.0.0.1");
-            int serverPort = 5001;
+            //CHANGE IP ADDRESS HERE!
+
+            System.out.println("Using default hardcoded server config file path:" + serverConfigFilePath);
+            List<Node> serverNodes = ConfigReader.readConfig(serverConfigFilePath);
+
+            if (serverNodes.size() != 1) {
+                System.out.println("There should be only one node in the configuration file.");
+                return;
+            }
+
+            String serverIPAddress = null;
+            int serverPort = 0;
+
+            // Add client nodes to the server
+            for (Node serverNode : serverNodes) {
+                serverIPAddress = serverNode.getIpAddress();
+                serverPort = serverNode.getPort();
+            }
+
+            System.out.println("Server IP Address: " + serverIPAddress + " Server Port: " + serverPort);
+            InetAddress serverAddress = InetAddress.getByName(serverIPAddress);
             
            client.start();
 
