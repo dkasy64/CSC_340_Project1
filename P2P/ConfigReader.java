@@ -17,8 +17,9 @@ public class ConfigReader {
             int nodeID = Integer.parseInt(parts[0].trim());
             String ipAddress = parts[1].trim();
             int port = Integer.parseInt(parts[2].trim());
+            String homeDirectoryPath = parts[3].trim();
 
-            Node node = new Node(nodeID, ipAddress, port);
+            Node node = new Node(nodeID, ipAddress, port, homeDirectoryPath);
             nodes.add(node);
         }
 

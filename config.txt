@@ -1,6 +1,6 @@
 # P2P Mode Configuration
 # Format: NodeID, IP Address, Port, Home Directory Path
 
-1, 10.111.155.164, 5001, /home/node1
+1, 10.111.155.164, 5001, C:\Users\dawit\OneDrive\Desktop\CSC340Pro1\P2P
 2, 10.111.145.237, 5002, /home/node2
 3, 10.111.155.193, 5003, /home/node3
