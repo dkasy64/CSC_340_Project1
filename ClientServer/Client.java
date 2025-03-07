@@ -31,19 +31,19 @@ public class Client {
         return node;
     }
 
-    public void recieveStatusUpdates() {
-        try (DatagramSocket recieveSocket = new DatagramSocket(node.getPort())) {
-            byte[] buffer = new byte[1024];
-            while (true) {
-                DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-                recieveSocket.receive(packet);
-                String message = new String(packet.getData(), 0, packet.getLength());
-                System.out.println("Recieved: " + message);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+     public void recieveStatusUpdates(){
+         try (DatagramSocket recieveSocket = new DatagramSocket(node.getPort())) {
+             byte[] buffer = new byte[1024];
+             while (true) {
+                 DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+                 recieveSocket.receive(packet);
+                 String message = new String(packet.getData(), 0, packet.getLength());
+                 System.out.println("Received: " + message);
+             }
+         } catch (Exception e) {
+             e.printStackTrace();
+         }
+     }
 
     public static void main(String[] args) throws Exception {
         Client client = null;
@@ -55,31 +55,36 @@ public class Client {
             nodeId = args[0];
         }
 
+        // Read the configuration file
         List<Node> nodes = ConfigReader.readConfig(null);
 
+        //pick node representing this Client ID
         for (Node node : nodes) {
-            if (node.getNodeID() == Integer.parseInt(nodeId)) {
-                client = new Client(node, null, 0);
-                break;
+           // if(node.getNodeID() == Integer.parseInt(args[0])){
+                if(node.getNodeID() == Integer.parseInt(nodeId)){
+                    client = new Client(node, null, 0);
+                    break;
             }
         }
 
-        DatagramSocket socket = new DatagramSocket();
-        InetAddress serverAddress = InetAddress.getByName("127.0.0.1");
-        int serverPort = 5001;
+            DatagramSocket socket = new DatagramSocket();
+            InetAddress serverAddress = InetAddress.getByName("127.0.0.1");
+            int serverPort = 5001;
+            
+           client.start();
 
-        client.start();
-
-        while (true) {
-            String message = "HEARTBEAT|" + nodeId + "|";
-            byte[] data = message.getBytes();
-            DatagramPacket packet = new DatagramPacket(data, data.length, serverAddress, serverPort);
-            socket.send(packet);
-            message = "DIRECTORY LISTING|" + nodeId + "|" + client.getNode().getFileNames();
-            data = message.getBytes();
-            packet = new DatagramPacket(data, data.length, serverAddress, serverPort);
-            socket.send(packet);
-            Thread.sleep(5000);
-        }
+            while (true) {
+                        //IF SWITCHING BACK TO ONLY ONE ARG, nodeID needs to be nodeId (lowercase d)
+                        String message = "HEARTBEAT|" + nodeId + "|";
+                        byte[] data = message.getBytes();
+                        DatagramPacket packet = new DatagramPacket(data, data.length, serverAddress, serverPort);
+                        socket.send(packet);
+                        message = "DIRECTORY_LISTING|" + nodeId + "|" + client.getNode().getFileNames();
+                        data = message.getBytes();
+                        packet = new DatagramPacket(data, data.length, serverAddress, serverPort);
+                        socket.send(packet);
+                       
+                Thread.sleep(5000);
+            }  
     }
 }
