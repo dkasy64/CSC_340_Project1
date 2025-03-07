@@ -31,6 +31,7 @@ public class Node {
         return homeDir;
     }
 
+    //returns the file names in the directory
     public String getFileNames() {
         File directory = new File(homeDir);
         String returnString = "";

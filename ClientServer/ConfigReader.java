@@ -10,9 +10,10 @@ public class ConfigReader {
         BufferedReader reader = new BufferedReader(new FileReader(filePath));
         String line;
 
+        //reads the config file and adds the nodes to the list
         while ((line = reader.readLine()) != null) {
             if (line.trim().isEmpty() || line.startsWith("#")) {
-                continue; // Skip empty lines and comments
+                continue;
             }
             String[] parts = line.split(",");
             int nodeID = Integer.parseInt(parts[0].trim());
